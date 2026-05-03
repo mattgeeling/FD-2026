@@ -1,32 +1,14 @@
-name: Deploy to Live Server
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Install lftp
-        run: sudo apt-get update && sudo apt-get install -y lftp
-
       - name: Deploy via SFTP
         run: |
           lftp -u "${{ secrets.SFTP_USERNAME }},${{ secrets.SFTP_PASSWORD }}" sftp://${{ secrets.SFTP_HOST }}:${{ secrets.SFTP_PORT }} <<EOF
           set sftp:auto-confirm yes
-          mkdir -p "${{ secrets.SFTP_REMOTE_PATH }}"
+          cd "${{ secrets.SFTP_REMOTE_PATH }}"
           mirror -R \
             --delete \
             --verbose \
             --exclude .git \
             --exclude .github \
             --exclude .DS_Store \
-            ./ "${{ secrets.SFTP_REMOTE_PATH }}"
+            ./ ./
           bye
           EOF
