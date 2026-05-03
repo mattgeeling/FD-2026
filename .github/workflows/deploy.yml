@@ -13,13 +13,20 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Install lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+
       - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
-        with:
-          server: ${{ secrets.SFTP_HOST }}
-          username: ${{ secrets.SFTP_USERNAME }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          port: ${{ secrets.SFTP_PORT }}
-          local_path: './'
-          remote_path: ${{ secrets.SFTP_REMOTE_PATH }}/
-          sftp_only: true
+        run: |
+          lftp -u "${{ secrets.SFTP_USERNAME }},${{ secrets.SFTP_PASSWORD }}" sftp://${{ secrets.SFTP_HOST }}:${{ secrets.SFTP_PORT }} <<EOF
+          set sftp:auto-confirm yes
+          mkdir -p "${{ secrets.SFTP_REMOTE_PATH }}"
+          mirror -R \
+            --delete \
+            --verbose \
+            --exclude .git \
+            --exclude .github \
+            --exclude .DS_Store \
+            ./ "${{ secrets.SFTP_REMOTE_PATH }}"
+          bye
+          EOF
