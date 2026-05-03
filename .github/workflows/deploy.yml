@@ -21,12 +21,9 @@ jobs:
           lftp -u "${{ secrets.SFTP_USERNAME }},${{ secrets.SFTP_PASSWORD }}" sftp://${{ secrets.SFTP_HOST }}:${{ secrets.SFTP_PORT }} <<EOF
           set sftp:auto-confirm yes
           cd "${{ secrets.SFTP_REMOTE_PATH }}"
-          mirror -R \
-            --delete \
-            --verbose \
-            --exclude .git \
-            --exclude .github \
-            --exclude .DS_Store \
-            ./ ./
+          mkdir Images
+          mkdir video
+          mkdir webfonts
+          mirror -R --delete --verbose --exclude .git --exclude .github --exclude .DS_Store ./ ./
           bye
           EOF
